@@ -1,10 +1,41 @@
-import { isBefore } from 'date-fns';
+import { isBefore, isAfter } from 'date-fns';
+import { Op } from 'sequelize';
 
-import User from '../models/User';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
+import File from '../models/File';
 
 class SubscriptionController {
+  async index(req, res) {
+    const subscriptions = await Subscription.findAll({
+      where: {
+        user_id: req.userId
+      },
+      attributes: ['meetup_id'],
+      include: [
+        {
+          model: Meetup,
+          as: 'meetup',
+          required: true,
+          where: {
+            date_hour: {[Op.gt]: new Date()}
+          },
+          attributes: ['id', 'title', 'description', 'localization', 'date_hour'],
+          include: [
+            {
+              model: File,
+              as: 'banner',
+              attributes: ['id', 'path', 'url', 'name']
+            }
+          ]
+        }
+      ],
+      order: [['meetup', 'date_hour']],
+    });
+
+    return res.json(subscriptions);
+  }
+
   async store(req, res) {
     const { meetupId } = req.params;
 

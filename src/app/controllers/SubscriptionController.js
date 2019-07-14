@@ -4,6 +4,9 @@ import { Op } from 'sequelize';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 import File from '../models/File';
+import User from '../models/User';
+import Queue from '../../lib/Queue';
+import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
   async index(req, res) {
@@ -39,7 +42,17 @@ class SubscriptionController {
   async store(req, res) {
     const { meetupId } = req.params;
 
-    const meetup = await Meetup.findByPk(meetupId);
+    const meetup = await Meetup.findByPk(
+      meetupId,
+      {
+        include: [
+          {
+            model: User,
+            as: 'organizer'
+          }
+        ]
+      }
+    );
 
     if(!meetup) {
       return res.status(400).json({ error: 'Meetup not found' });
@@ -89,6 +102,13 @@ class SubscriptionController {
     const newSubscription = await Subscription.create({
       user_id: userId,
       meetup_id: meetupId,
+    });
+
+    const subscriber = await User.findByPk(userId);
+
+    await Queue.add(SubscriptionMail.key, {
+      meetup,
+      subscriber
     });
 
     return res.json(newSubscription);

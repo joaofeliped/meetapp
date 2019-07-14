@@ -1,6 +1,7 @@
-<strong>Olá, {{ provider }}</strong>
-<p>Houve uma inscrição no meetup {{ meetup.name }}, confira os detalhes abaixo:</p>
+<strong>Olá, {{ organizer }}</strong>
+<p>Houve uma nova inscrição no meetup {{ meetup.title }}, confira os detalhes abaixo:</p>
 <p>
   <strong>Inscrito: </strong> {{ user }}<br />
   <strong>Data/hora: </strong> {{ date }}<br />
+  <strong>Local: </strong> {{ meetup.localization }}<br />
 </p>

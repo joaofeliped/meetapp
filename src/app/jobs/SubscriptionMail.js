@@ -8,16 +8,17 @@ class SubscriptionMail {
   }
 
   async handle({ data }) {
-    const { subscription } = data;
+    const { meetup, subscriber } = data;
 
     await Mail.sendMail({
-      to: `${subscription.meetup.user.name} <${subscription.meetup.user.email}>`,
+      to: `${subscriber.name} <${subscriber.email}>`,
       subject: 'Nova inscrição de meetup',
       template: 'subscription',
       context: {
-        meetup: subscription.meetup,
-        user: subscription.user.name,
-        date: format(parseISO(subscription.meetup.date_hour), "'dia' dd 'de' MMMM', às' H:mm'h'", { locale: pt })
+        organizer: meetup.organizer.name,
+        meetup: meetup,
+        user: subscriber.name,
+        date: format(parseISO(meetup.date_hour), "'dia' dd 'de' MMMM', às' H:mm'h'", { locale: pt })
       }
     });
   }
